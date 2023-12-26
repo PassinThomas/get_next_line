@@ -6,7 +6,7 @@
 /*   By: tpassin <tpassin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/22 03:44:42 by tpassin           #+#    #+#             */
-/*   Updated: 2023/12/23 07:04:33 by tpassin          ###   ########.fr       */
+/*   Updated: 2023/12/26 10:51:40 by tpassin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #  define BUFFER_SIZE 5
 # endif
 
-# define MAX_FD 1024
+# define MAX_FD 4096
 
 int		ft_strlen(const char *str);
 char	*ft_strchr(const char *s, int c);

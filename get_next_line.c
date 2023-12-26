@@ -6,7 +6,7 @@
 /*   By: tpassin <tpassin@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/11 22:20:28 by tpassin           #+#    #+#             */
-/*   Updated: 2023/12/23 08:21:14 by tpassin          ###   ########.fr       */
+/*   Updated: 2023/12/26 11:21:52 by tpassin          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 static char	*line_buffer(int fd, char *next_read, char *buf);
 static char	*set_line(char *line_buffer);
+static char	*extract_line(char *buf);
 
 char	*ft_strchr(const char *s, int c)
 {
@@ -37,7 +38,7 @@ char	*get_next_line(int fd)
 	char		*line;
 	char		*buf;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0 || fd > 1023)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
 	buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (!buf)
@@ -45,8 +46,14 @@ char	*get_next_line(int fd)
 	line = line_buffer(fd, next_read, buf);
 	free(buf);
 	if (!line)
-		return (NULL);
+		return (free(line), NULL);
 	next_read = set_line(line);
+	buf = line;
+	if (buf == NULL)
+		return (free(buf), free(next_read), NULL);
+	if (!next_read)
+		free(next_read);
+	line = extract_line(buf);
 	return (line);
 }
 
@@ -60,7 +67,7 @@ static char	*line_buffer(int fd, char *next_read, char *buf)
 	{
 		b_read = read(fd, buf, BUFFER_SIZE);
 		if (b_read == -1)
-			return (free(next_read), NULL);
+			return (free(buf), free(next_read), NULL);
 		if (b_read == 0)
 			break ;
 		buf[b_read] = '\0';
@@ -92,21 +99,48 @@ static char	*set_line(char *line_buffer)
 	line_buffer[i + 1] = '\0';
 	return (stash);
 }
+
+static char	*extract_line(char *buf)
+{
+	ssize_t	i;
+	char	*new_line;
+
+	i = 0;
+	while (buf[i] && buf[i] != '\n')
+		i++;
+	new_line = malloc(sizeof(char) * (i + 2));
+	if (!new_line)
+		return (free(new_line), NULL);
+	i = 0;
+	while (buf[i] && buf[i] != '\n')
+	{
+		new_line[i] = buf[i];
+		i++;
+	}
+	if (buf[i] == '\n')
+	{
+		new_line[i] = buf[i];
+		i++;
+	}
+	new_line[i] = '\0';
+	free(buf);
+	return (new_line);
+}
 /*int	main(void)
 {
 	int fd;
+	int i;
 
+	i = 0;
 	fd = open("test.txt", O_RDONLY);
 	if (fd == -1)
 		return (1);
 
 	char *line;
-	while (1)
+	while (i++ < 10)
 	{
 		line = get_next_line(fd);
-		if (line == NULL)
-			break ;
-		printf("%s\n", line);
+		printf("%s", line);
 		free(line);
 	}
 	close(fd);
